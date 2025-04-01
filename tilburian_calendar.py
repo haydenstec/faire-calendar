@@ -19,14 +19,11 @@ if len(sys.argv) > 1:
 tilburian_year = ((today - start_date).days // 380) + 1
 
 # generate cyclical Tilburian year
-cycle_count = 0
-year_of_the = "Unknown year"
+cycle_count = tilburian_year - (tilburian_year // 10)
+year_of_the = "Cabbage" # default Cabbage, then check if watermelon
 if (((tilburian_year - 1) % 10) == 9): # is watermelon
     cycle_count = tilburian_year // 10 # rounded down integer from 10
     year_of_the = "Watermelon"
-else: # is cabbage
-    cycle_count = tilburian_year - (tilburian_year // 10)
-    year_of_the = "Cabbage"
 
 cycle_year_label = f"{cycle_count} Year of the {year_of_the}"
 
@@ -35,7 +32,7 @@ cycle_year_label = f"{cycle_count} Year of the {year_of_the}"
 tilburian_year_start = start_date + timedelta(days = (tilburian_year - 1) * 380)
 end_of_tilburian_year = tilburian_year_start + timedelta(days = 379)
 
-# gregorian calendar years in Tilburian year
+# gregorian calendar years in Tilburian year - for checking Easter dates
 start_gregorian_year = tilburian_year_start.year
 end_gregorian_year = end_of_tilburian_year.year
 
@@ -85,10 +82,6 @@ for easter in easters_in_tilburian_year:
 # Christmas
 christmas = datetime(1, 12, 25)
 
-# Christmas Octave (25th December to 1st January)
-christmas_octave_start = datetime(1, 12, 25)
-christmas_octave_end = datetime(1, 1, 1)
-
 # Feast of St. Januarius
 feast_of_st_januarius = datetime(1, 9, 19)
 octave_of_gennaro_end = feast_of_st_januarius + timedelta(days=7)
@@ -105,7 +98,7 @@ custom_months = [
     {"month_name": "mensis Iacobi", "start_day": 82, "end_day": 124},  # day 82 to day 124
     {"month_name": "mensis Benedicti", "start_day": 125, "end_day": 167},  # day 125 to day 167
     {"month_name": "mensis Petri", "start_day": 168, "end_day": 295},  # day 168 to day 295
-    {"month_name": "mensis vagandi (Roving Month)", "start_day": 296, "end_day": 380},  # day 296 to day 379
+    {"month_name": "mensis vagandi", "start_day": 296, "end_day": 380},  # day 296 to day 379
 ]
 
 # DONE ASSIGNING FIXED TILBURIAN FESTIVALS
@@ -152,15 +145,11 @@ for day in range(1, 381):
     if tilburian_date in pentecost_dates:
         festival.append("Pentecost")
     
-    # Feast of St. Januarius (September 19th) or Octave
+    # Feast of St. Januarius (September 19th) and Octave
     if tilburian_date.month == feast_of_st_januarius.month and tilburian_date.day == feast_of_st_januarius.day:
         festival.append("Feast of St. Januarius: Patron of Tilbury")
-    elif feast_of_st_januarius.month == tilburian_date.month and feast_of_st_januarius.day < tilburian_date.day <= octave_of_gennaro_end.day:
+    if feast_of_st_januarius.month == tilburian_date.month and feast_of_st_januarius.day < tilburian_date.day <= octave_of_gennaro_end.day:
         festival.append("Octave of St. Januarius")
-
-    # Novena to St. Januarius - remembered by the broomsticks that brough Tilbury Her Patron
-    if broomsticks_start <= tilburian_date <= broomsticks_end:
-        festival.append("Novena to St. Januarius")
 
     # Kupus and Tilburian calendrical holidays
     if day == 1:
@@ -176,6 +165,10 @@ for day in range(1, 381):
     if day == 296:
         festival.append("Cleaning Day")
 
+    # Novena to St. Januarius
+    if broomsticks_start.day <= tilburian_date.day <= broomsticks_end.day and broomsticks_start.month <= tilburian_date.month <= broomsticks_end.month:
+         festival.append("Novena to St. Januarius")
+
     festival_string = ", ".join(festival) if festival else ""
 
     # CALCULATING MONTHS
@@ -183,10 +176,10 @@ for day in range(1, 381):
     # month for the current day
     month_name = day_to_month.get(day, "Unknown Month")
 
-    # day of the month
+    # day of the kupian month
     for month in custom_months:
         if month_name == month['month_name'] and month['start_day'] <= day <= month['end_day']:
-            day_of_the_month = day - month['start_day'] + 1  # Day within the month (starting from 1)
+            day_of_the_month = day - month['start_day'] + 1
             break
     else:
         day_of_the_month = "Unknown Day"

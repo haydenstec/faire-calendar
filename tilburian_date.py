@@ -5,18 +5,20 @@ import subprocess
 import time
 import os
 
+'''Runs Tilburian calendar to acquire needed calendar information.'''
 def run_tilburian_calendar(date_str):
     try:
-        # Pass the date as a command-line argument to tilburian_calendar.py
         subprocess.run(['python', 'tilburian_calendar.py', date_str], check=True)
         print("Tilburian calendar CSV generated successfully.")
     except subprocess.CalledProcessError:
         print("Error generating the Tilburian calendar CSV.")
         sys.exit(1)
 
+'''Given the year, checks if the appropriately named calendar file exists. 
+Waits to ensure generation in case run_tilburian_calendar was called.'''
 def wait_for_csv_file(tilburian_year):
     file_path = f"tilburian_year_{tilburian_year}.csv"
-    timeout = 10  # Maximum wait time in seconds
+    timeout = 10  # max wait time in seconds
     start_time = time.time()
 
     while not os.path.exists(file_path):
@@ -25,15 +27,18 @@ def wait_for_csv_file(tilburian_year):
             sys.exit(1)
         time.sleep(1)
 
+'''Given a Gregorian date, obtains and structures a Kupian/Tilburian date.'''
 def get_tilburian_info_from_csv(gregorian_date):
     gregorian_date_str = gregorian_date.strftime("%A, %B %d, %Y")
 
+    # calculate kupian year for .csv
     start_date = datetime(2009, 8, 23)
     tilburian_total_year = ((gregorian_date - start_date).days // 380) + 1
 
+    # run a brief timer so .csv can be generated
     wait_for_csv_file(tilburian_total_year)
     
-    # try to read the CSV and find the matching row
+    # try to read the .csv and find the matching row
     try:
         with open(f"tilburian_year_{tilburian_total_year}.csv", mode='r') as file:
             csv_reader = csv.DictReader(file)
@@ -43,7 +48,7 @@ def get_tilburian_info_from_csv(gregorian_date):
                     tilburian_month = row['Tilburian Month']
                     tilburian_year = row['Tilburian Cycle Year']
                     festival = row['Festival'] if row['Festival'].strip() else 'none'
-                    # Structure output as requested
+                    
                     return {
                         "Gregorian Date": gregorian_date_str,
                         "Tilburian Date": f"{tilburian_month} {tilburian_day},  {tilburian_year}",
